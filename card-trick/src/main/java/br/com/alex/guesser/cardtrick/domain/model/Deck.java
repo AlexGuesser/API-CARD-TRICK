@@ -15,7 +15,7 @@ import javax.persistence.OneToOne;
 public class Deck implements Serializable {
 	
 	@Id
-	private String deck_id;
+	private String deckId;
 	@OneToOne
 	private Pile pile1;
 	@OneToOne
@@ -24,20 +24,20 @@ public class Deck implements Serializable {
 	private Pile pile3;
 	@OneToMany
 	private List<Card> allCards;
-	private int numberOfplays;
+	private int round;
 	
 	public Deck() {
 		
 	}
 
-	public String getDeck_id() {
-		return deck_id;
+	public String getDeckId() {
+		return deckId;
 	}
 
 
 
-	public void setDeck_id(String deck_id) {
-		this.deck_id = deck_id;
+	public void setDeckId(String deckId) {
+		this.deckId = deckId;
 	}
 
 
@@ -91,13 +91,13 @@ public class Deck implements Serializable {
 
 
 	public int getNumberOfplays() {
-		return numberOfplays;
+		return round;
 	}
 
 
 
 	public void setNumberOfplays(int numberOfplays) {
-		this.numberOfplays = numberOfplays;
+		this.round = numberOfplays;
 	}
 
 
@@ -115,8 +115,8 @@ public class Deck implements Serializable {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((allCards == null) ? 0 : allCards.hashCode());
-		result = prime * result + ((deck_id == null) ? 0 : deck_id.hashCode());
-		result = prime * result + numberOfplays;
+		result = prime * result + ((deckId == null) ? 0 : deckId.hashCode());
+		result = prime * result + round;
 		result = prime * result + ((pile1 == null) ? 0 : pile1.hashCode());
 		result = prime * result + ((pile2 == null) ? 0 : pile2.hashCode());
 		result = prime * result + ((pile3 == null) ? 0 : pile3.hashCode());
@@ -137,12 +137,12 @@ public class Deck implements Serializable {
 				return false;
 		} else if (!allCards.equals(other.allCards))
 			return false;
-		if (deck_id == null) {
-			if (other.deck_id != null)
+		if (deckId == null) {
+			if (other.deckId != null)
 				return false;
-		} else if (!deck_id.equals(other.deck_id))
+		} else if (!deckId.equals(other.deckId))
 			return false;
-		if (numberOfplays != other.numberOfplays)
+		if (round != other.round)
 			return false;
 		if (pile1 == null) {
 			if (other.pile1 != null)

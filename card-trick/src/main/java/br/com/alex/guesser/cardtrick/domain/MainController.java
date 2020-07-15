@@ -55,19 +55,19 @@ public class MainController {
 		
 		String idString = Long.toString(System.currentTimeMillis());
 		
-		String deck_id = Base64.getEncoder().encodeToString(idString.getBytes());
+		String deckId = Base64.getEncoder().encodeToString(idString.getBytes());
 		
-		List<Card> cards = Deck.converter(codeCards,deck_id,0);
+		List<Card> cards = Deck.converter(codeCards,deckId,0);
 
 		Deck deck = new Deck();
-		deck.setDeck_id(deck_id);
+		deck.setDeckId(deckId);
 		deck.setAllCards(cards);
 
 		cards.forEach((card) -> cardRepository.save(card));
 
-		Pile pile1 = new Pile(cards.subList(0, 7), 1,deck_id);
-		Pile pile2 = new Pile(cards.subList(7, 14), 2,deck_id);
-		Pile pile3 = new Pile(cards.subList(14, 21), 3,deck_id);
+		Pile pile1 = new Pile(cards.subList(0, 7), 1,deckId);
+		Pile pile2 = new Pile(cards.subList(7, 14), 2,deckId);
+		Pile pile3 = new Pile(cards.subList(14, 21), 3,deckId);
 
 		pileRepository.save(pile1);
 		pileRepository.save(pile2);
@@ -85,19 +85,19 @@ public class MainController {
 	}
 
 	@GetMapping("/plays")
-	public ResponseEntity<DeckDto> play(@RequestParam String deck_id, @RequestParam  int numberOfPlay, @RequestParam  int pointedPile) {
+	public ResponseEntity<DeckDto> play(@RequestParam String deckId, @RequestParam  int round, @RequestParam  int pile) {
 
-		if(deckRepository.findById(deck_id).isEmpty()){
+		if(deckRepository.findById(deckId).isEmpty()){
 			
 			return ResponseEntity.badRequest().build();
 			
 		};
 		
-		Deck deck = deckRepository.getOne(deck_id);
+		Deck deck = deckRepository.getOne(deckId);
 		
 		int oldNumberOfPlays = deck.getNumberOfplays();
 		
-		if(numberOfPlay != oldNumberOfPlays +1 || numberOfPlay==4){
+		if(round != oldNumberOfPlays +1 || round==4){
 			
 			return ResponseEntity.badRequest().build();
 			
@@ -115,7 +115,7 @@ public class MainController {
 		System.out.println("Pile2 inical" + deck.getPile2().getCards());
 		System.out.println("Pile3 inical" + deck.getPile3().getCards());
 
-		switch (pointedPile) {
+		switch (pile) {
 
 		case 1:
 			
@@ -177,7 +177,7 @@ public class MainController {
 			Card newCard = new Card();
 			newCard.setCode(card.getCode());
 			newCard.setDeck_id(card.getDeck_id());
-			newCard.setNumberOfPlay(numberOfPlay);
+			newCard.setNumberOfPlay(round);
 			cardRepository.save(newCard);
 			newCardsReorganized.add(newCard);
 			
@@ -203,7 +203,7 @@ public class MainController {
 		pileRepository.save(pile2);
 		pileRepository.save(pile3);
 		
-		deck.setNumberOfplays(numberOfPlay);
+		deck.setNumberOfplays(round);
 		deck.setAllCards(cardsReorganized);
 		
 		
@@ -211,7 +211,7 @@ public class MainController {
 
 		DeckDto deckDto = DeckDto.converter(deck);
 
-		if (numberOfPlay == 3) {
+		if (round == 3) {
 			deckDto.setYourCardIs(deckDto.getPile2().getCardsDto().get(3).getCode());
 		}
 

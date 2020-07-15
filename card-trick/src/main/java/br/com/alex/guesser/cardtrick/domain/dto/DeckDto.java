@@ -5,17 +5,17 @@ import br.com.alex.guesser.cardtrick.domain.model.Pile;
 
 public class DeckDto {
 	
-	private String deck_id;
+	private String deckId;
 	private PileDto pile1;
 	private PileDto pile2;
 	private PileDto pile3;
 	private String yourCardIs = "";
 	
-	public String getDeck_id() {
-		return deck_id;
+	public String getDeckId() {
+		return deckId;
 	}
-	public void setDeck_id(String deck_id) {
-		this.deck_id = deck_id;
+	public void setDeckId(String deck_id) {
+		this.deckId = deck_id;
 	}
 	
 	public PileDto getPile1() {
@@ -45,7 +45,7 @@ public class DeckDto {
 	public static DeckDto converter(Deck deck) {
 		
 		DeckDto deckDto = new DeckDto();
-		deckDto.setDeck_id(deck.getDeck_id());
+		deckDto.setDeckId(deck.getDeckId());
 		deckDto.setPile1(PileDto.converter(deck.getPile1()));
 		deckDto.setPile2(PileDto.converter(deck.getPile2()));
 		deckDto.setPile3(PileDto.converter(deck.getPile3()));
