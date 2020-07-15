@@ -1,20 +1,22 @@
 package br.com.alex.guesser.cardtrick.domain;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
 
 import br.com.alex.guesser.cardtrick.domain.dto.DeckDto;
 import br.com.alex.guesser.cardtrick.domain.model.Card;
@@ -83,9 +85,26 @@ public class MainController {
 	}
 
 	@GetMapping("/plays")
-	public DeckDto play(@RequestParam String deck_id, @RequestParam int numberOfPlay, @RequestParam int pointedPile) {
+	public ResponseEntity<DeckDto> play(@RequestParam String deck_id, @RequestParam  int numberOfPlay, @RequestParam  int pointedPile) {
 
+		if(deckRepository.findById(deck_id).isEmpty()){
+			
+			return ResponseEntity.badRequest().build();
+			
+		};
+		
 		Deck deck = deckRepository.getOne(deck_id);
+		
+		int oldNumberOfPlays = deck.getNumberOfplays();
+		
+		if(numberOfPlay != oldNumberOfPlays +1 || numberOfPlay==4){
+			
+			return ResponseEntity.badRequest().build();
+			
+		}
+		
+		
+		
 		List<Card> cardsReorganized = new ArrayList();
 		
 		Long idPile1 = deck.getPile1().getId();
@@ -196,7 +215,7 @@ public class MainController {
 			deckDto.setYourCardIs(deckDto.getPile2().getCardsDto().get(3).getCode());
 		}
 
-		return deckDto;
+		return ResponseEntity.ok(deckDto);
 
 	}
 
