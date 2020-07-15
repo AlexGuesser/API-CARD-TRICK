@@ -51,7 +51,7 @@ public class MainController {
 		
 		String deck_id = deckInfo.getDeck_id();
 
-		List<Card> cards = Deck.converter(cardsForm,deck_id);
+		List<Card> cards = Deck.converter(cardsForm,deck_id,0);
 
 		Deck deck = new Deck();
 		deck.setDeck_id(deckInfo.getDeck_id());
@@ -87,6 +87,10 @@ public class MainController {
 		Long idPile1 = deck.getPile1().getId();
 		Long idPile2 = deck.getPile2().getId();
 		Long idPile3 = deck.getPile3().getId();
+		
+		System.out.println("Pile1 inical" + deck.getPile1().getCards());
+		System.out.println("Pile2 inical" + deck.getPile2().getCards());
+		System.out.println("Pile3 inical" + deck.getPile3().getCards());
 
 		switch (pointedPile) {
 
@@ -143,16 +147,33 @@ public class MainController {
 		cardsReorganized.addAll(newPile2);
 		cardsReorganized.addAll(newPile3);
 		
+		List<Card> newCardsReorganized = new ArrayList();
+		
+		cardsReorganized.forEach((card) -> {
+			
+			Card newCard = new Card();
+			newCard.setCode(card.getCode());
+			newCard.setDeck_id(card.getDeck_id());
+			newCard.setNumberOfPlay(numberOfPlay);
+			cardRepository.save(newCard);
+			newCardsReorganized.add(newCard);
+			
+		});
+		
 		newPile1.clear();
 		newPile2.clear();
 		newPile3.clear();
 		
-		newPile1.addAll(cardsReorganized.subList(0, 7));
-		newPile2.addAll(cardsReorganized.subList(7, 14));
-		newPile3.addAll(cardsReorganized.subList(14, 21));
+		newPile1.addAll(newCardsReorganized.subList(0, 7));
+		newPile2.addAll(newCardsReorganized.subList(7, 14));
+		newPile3.addAll(newCardsReorganized.subList(14, 21));
 		
 		
-
+		System.out.println("newPile1 após reorganizar: " + newPile1);
+		System.out.println("newPile2 após reorganizar: " + newPile2);
+		System.out.println("newPile3 após reorganizar: " + newPile3);
+		
+		
 		Pile pile1 = pileRepository.getOne(idPile1);
 		Pile pile2 = pileRepository.getOne(idPile2);
 		Pile pile3 = pileRepository.getOne(idPile3);
@@ -161,15 +182,15 @@ public class MainController {
 		pile2.setCards(newPile2);
 		pile3.setCards(newPile3);
 		
+		System.out.println("Pile2 atualizado" + pile2.getCards());
+		
 		pileRepository.save(pile1);
 		pileRepository.save(pile2);
 		pileRepository.save(pile3);
 		
 		deck.setNumberOfplays(numberOfPlay);
 		deck.setAllCards(cardsReorganized);
-		deck.setPile1(pile1);
-		deck.setPile2(pile2);
-		deck.setPile3(pile3);
+		
 		
 		deckRepository.save(deck);
 

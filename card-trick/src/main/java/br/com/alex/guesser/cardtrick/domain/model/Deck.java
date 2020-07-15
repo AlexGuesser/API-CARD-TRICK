@@ -102,10 +102,10 @@ public class Deck implements Serializable {
 
 
 
-	public static List<Card> converter(List<CardForm> cardsForm,String deck_id) {
+	public static List<Card> converter(List<CardForm> cardsForm,String deck_id,Integer numberOfPlay) {
 		
 		List<Card> cardsModel = new ArrayList<>();
-		cardsForm.forEach((cardForm) -> cardsModel.add(new Card(cardForm.getCode(),deck_id)));
+		cardsForm.forEach((cardForm) -> cardsModel.add(new Card(cardForm.getCode(),deck_id,numberOfPlay)));
 		
 		return cardsModel;
 	}

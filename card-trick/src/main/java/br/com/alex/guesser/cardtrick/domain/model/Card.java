@@ -14,19 +14,29 @@ public class Card {
 	private Long id;
 	private String deck_id;
 	private String code;
+	private Integer numberOfPlay;
 	
 	
 	public Card() {
 		
 	}
 
-	public Card(String code,String deck_id) {
+	public Card(String code,String deck_id,Integer numberOfPlay) {
 		
 		this.code = code;
 		this.deck_id = deck_id;
+		this.numberOfPlay = numberOfPlay;
 		
 	}
 	
+
+	public Integer getNumberOfPlay() {
+		return numberOfPlay;
+	}
+
+	public void setNumberOfPlay(Integer numberOfPlay) {
+		this.numberOfPlay = numberOfPlay;
+	}
 
 	public Long getId() {
 		return id;
@@ -79,6 +89,11 @@ public class Card {
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		
+		return this.code + " " + this.id;
+	}
 	
 	
 	
