@@ -1,6 +1,10 @@
 package br.com.alex.guesser.cardtrick.domain;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import br.com.alex.guesser.cardtrick.deckofcardsapi.controller.modelForm.CardForm;
-import br.com.alex.guesser.cardtrick.deckofcardsapi.controller.modelForm.DeckInfoForm;
-import br.com.alex.guesser.cardtrick.deckofcardsapi.controller.modelForm.DrawedDeckForm;
+
 import br.com.alex.guesser.cardtrick.domain.dto.DeckDto;
 import br.com.alex.guesser.cardtrick.domain.model.Card;
 import br.com.alex.guesser.cardtrick.domain.model.Deck;
@@ -38,23 +40,25 @@ public class MainController {
 	@GetMapping
 	public DeckDto showDeck() {
 
-		RestTemplate restTemplate = new RestTemplate();
-		DeckInfoForm deckInfo = restTemplate
-				.getForObject("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1", DeckInfoForm.class);
-
-		DrawedDeckForm drawedDeck = restTemplate.getForObject(
-				"https://deckofcardsapi.com/api/deck/" + deckInfo.getDeck_id() + "/draw/?count=21",
-				DrawedDeckForm.class);
-
-		List<CardForm> cardsForm = drawedDeck.getCards();
-		// cardsForm.forEach((cardForm) -> System.out.println(cardForm));
+		List<String> allCards = Arrays.asList("AS","2S","3S","4S","5S","6S","7S","8S","9S","10S","JS","QS","KS",
+											  "AC","2C","3C","4C","5C","6C","7C","8C","9C","10C","JC","QC","KC",
+											  "AH","2H","3H","4H","5H","6H","7H","8H","9H","10H","JH","QH","KH",
+											  "AD","2D","3D","4D","5D","6D","7D","8D","9D","10D","JD","QD","KD");
 		
-		String deck_id = deckInfo.getDeck_id();
-
-		List<Card> cards = Deck.converter(cardsForm,deck_id,0);
+		Collections.shuffle(allCards);
+		
+		List<String> codeCards = new ArrayList();
+		
+		codeCards.addAll(allCards.subList(0, 21));
+		
+		String idString = Long.toString(System.currentTimeMillis());
+		
+		String deck_id = Base64.getEncoder().encodeToString(idString.getBytes());
+		
+		List<Card> cards = Deck.converter(codeCards,deck_id,0);
 
 		Deck deck = new Deck();
-		deck.setDeck_id(deckInfo.getDeck_id());
+		deck.setDeck_id(deck_id);
 		deck.setAllCards(cards);
 
 		cards.forEach((card) -> cardRepository.save(card));
@@ -166,13 +170,7 @@ public class MainController {
 		
 		newPile1.addAll(newCardsReorganized.subList(0, 7));
 		newPile2.addAll(newCardsReorganized.subList(7, 14));
-		newPile3.addAll(newCardsReorganized.subList(14, 21));
-		
-		
-		System.out.println("newPile1 após reorganizar: " + newPile1);
-		System.out.println("newPile2 após reorganizar: " + newPile2);
-		System.out.println("newPile3 após reorganizar: " + newPile3);
-		
+		newPile3.addAll(newCardsReorganized.subList(14, 21));		
 		
 		Pile pile1 = pileRepository.getOne(idPile1);
 		Pile pile2 = pileRepository.getOne(idPile2);
@@ -181,8 +179,6 @@ public class MainController {
 		pile1.setCards(newPile1);
 		pile2.setCards(newPile2);
 		pile3.setCards(newPile3);
-		
-		System.out.println("Pile2 atualizado" + pile2.getCards());
 		
 		pileRepository.save(pile1);
 		pileRepository.save(pile2);

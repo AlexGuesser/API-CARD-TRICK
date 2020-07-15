@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
-import br.com.alex.guesser.cardtrick.deckofcardsapi.controller.modelForm.CardForm;
+
 
 @Entity
 public class Deck implements Serializable {
@@ -102,10 +102,10 @@ public class Deck implements Serializable {
 
 
 
-	public static List<Card> converter(List<CardForm> cardsForm,String deck_id,Integer numberOfPlay) {
+	public static List<Card> converter(List<String> codeCards,String deck_id,Integer numberOfPlay) {
 		
 		List<Card> cardsModel = new ArrayList<>();
-		cardsForm.forEach((cardForm) -> cardsModel.add(new Card(cardForm.getCode(),deck_id,numberOfPlay)));
+		codeCards.forEach((code) -> cardsModel.add(new Card(code,deck_id,numberOfPlay)));
 		
 		return cardsModel;
 	}
