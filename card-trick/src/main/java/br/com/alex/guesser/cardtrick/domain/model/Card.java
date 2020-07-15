@@ -1,6 +1,8 @@
 package br.com.alex.guesser.cardtrick.domain.model;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
@@ -8,6 +10,9 @@ import javax.persistence.ManyToOne;
 public class Card {
 	
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	private String deck_id;
 	private String code;
 	
 	
@@ -15,10 +20,28 @@ public class Card {
 		
 	}
 
-	public Card(String code) {
+	public Card(String code,String deck_id) {
 		
 		this.code = code;
+		this.deck_id = deck_id;
 		
+	}
+	
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getDeck_id() {
+		return deck_id;
+	}
+
+	public void setDeck_id(String deck_id) {
+		this.deck_id = deck_id;
 	}
 
 	public String getCode() {

@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -104,10 +102,10 @@ public class Deck implements Serializable {
 
 
 
-	public static List<Card> converter(List<CardForm> cardsForm) {
+	public static List<Card> converter(List<CardForm> cardsForm,String deck_id) {
 		
 		List<Card> cardsModel = new ArrayList<>();
-		cardsForm.forEach((cardForm) -> cardsModel.add(new Card(cardForm.getCode())));
+		cardsForm.forEach((cardForm) -> cardsModel.add(new Card(cardForm.getCode(),deck_id)));
 		
 		return cardsModel;
 	}

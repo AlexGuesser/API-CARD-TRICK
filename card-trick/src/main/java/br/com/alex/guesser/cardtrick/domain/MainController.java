@@ -33,10 +33,10 @@ public class MainController {
 	CardRepository cardRepository;
 
 	@Autowired
-	PileRepository PileRepository;
+	PileRepository pileRepository;
 
 	@GetMapping
-	public Deck showDeck() {
+	public DeckDto showDeck() {
 
 		RestTemplate restTemplate = new RestTemplate();
 		DeckInfoForm deckInfo = restTemplate
@@ -48,32 +48,33 @@ public class MainController {
 
 		List<CardForm> cardsForm = drawedDeck.getCards();
 		// cardsForm.forEach((cardForm) -> System.out.println(cardForm));
+		
+		String deck_id = deckInfo.getDeck_id();
 
-		List<Card> cards = Deck.converter(cardsForm);
+		List<Card> cards = Deck.converter(cardsForm,deck_id);
 
 		Deck deck = new Deck();
 		deck.setDeck_id(deckInfo.getDeck_id());
 		deck.setAllCards(cards);
 
 		cards.forEach((card) -> cardRepository.save(card));
-			
 
-		
+		Pile pile1 = new Pile(cards.subList(0, 7), 1,deck_id);
+		Pile pile2 = new Pile(cards.subList(7, 14), 2,deck_id);
+		Pile pile3 = new Pile(cards.subList(14, 21), 3,deck_id);
 
-		Pile pile1 = new Pile(cards.subList(0, 7), 1);
-		Pile pile2 = new Pile(cards.subList(7, 14), 2);
-		Pile pile3 = new Pile(cards.subList(14, 21), 3);
-
-		PileRepository.save(pile1);
-		PileRepository.save(pile2);
-		PileRepository.save(pile3);
+		pileRepository.save(pile1);
+		pileRepository.save(pile2);
+		pileRepository.save(pile3);
 
 		deck.setPile1(pile1);
 		deck.setPile2(pile2);
 		deck.setPile3(pile3);
 		deck.setNumberOfplays(0);
 
-		return deckRepository.save(deck);
+		deckRepository.save(deck);
+		
+		return DeckDto.converter(deck);
 
 	}
 
@@ -82,90 +83,100 @@ public class MainController {
 
 		Deck deck = deckRepository.getOne(deck_id);
 		List<Card> cardsReorganized = new ArrayList();
+		
+		Long idPile1 = deck.getPile1().getId();
+		Long idPile2 = deck.getPile2().getId();
+		Long idPile3 = deck.getPile3().getId();
 
 		switch (pointedPile) {
 
 		case 1:
 			
-			deck.getPile2().getCards().forEach((cardPile2) -> cardsReorganized.add(cardPile2));
-			deck.getPile1().getCards().forEach((cardPile1) -> cardsReorganized.add(cardPile1));
-			deck.getPile3().getCards().forEach((cardPile3) -> cardsReorganized.add(cardPile3));
-			
-			
-			/*
-			 cardsReorganized.addAll(deck.getPile2().getCards());
-			 cardsReorganized.addAll(deck.getPile1().getCards());
-			 cardsReorganized.addAll(deck.getPile3().getCards());
-			 */
-			 
+			cardsReorganized.addAll(deck.getPile2().getCards());
+			cardsReorganized.addAll(deck.getPile1().getCards());
+			cardsReorganized.addAll(deck.getPile3().getCards()); 
 			break;
 
 		case 2:
 			
-			deck.getPile1().getCards().forEach((cardPile1) -> cardsReorganized.add(cardPile1));
-			deck.getPile2().getCards().forEach((cardPile2) -> cardsReorganized.add(cardPile2));
-			deck.getPile3().getCards().forEach((cardPile3) -> cardsReorganized.add(cardPile3));
-			
-			
-			/*
-			 cardsReorganized.addAll(deck.getPile1().getCards());
-			 cardsReorganized.addAll(deck.getPile2().getCards());
-			 cardsReorganized.addAll(deck.getPile3().getCards());
-			 */
-			 
+			cardsReorganized.addAll(deck.getPile1().getCards());
+			cardsReorganized.addAll(deck.getPile2().getCards());
+			cardsReorganized.addAll(deck.getPile3().getCards()); 
 			break;
 
 		case 3:
 			
-			deck.getPile1().getCards().forEach((cardPile1) -> cardsReorganized.add(cardPile1));
-			deck.getPile3().getCards().forEach((cardPile3) -> cardsReorganized.add(cardPile3));
-			deck.getPile2().getCards().forEach((cardPile2) -> cardsReorganized.add(cardPile2));
-			
-			
-			/*
-			 cardsReorganized.addAll(deck.getPile1().getCards());
-			 cardsReorganized.addAll(deck.getPile3().getCards());
-			 cardsReorganized.addAll(deck.getPile2().getCards());
-			 */
-			 
+			cardsReorganized.addAll(deck.getPile1().getCards());
+			cardsReorganized.addAll(deck.getPile3().getCards());
+			cardsReorganized.addAll(deck.getPile2().getCards());
 			break;
 		}
 
-		Pile newPile1 = new Pile(new ArrayList<Card>(), 1);
-		Pile newPile2 = new Pile(new ArrayList<Card>(), 2);
-		Pile newPile3 = new Pile(new ArrayList<Card>(), 3);
+		List<Card> newPile1 = new ArrayList();
+		List<Card> newPile2 = new ArrayList();
+		List<Card> newPile3 = new ArrayList();
+		
 
 		for (int i = 0; i <= 20; i += 3) {
 
 			Card card = cardsReorganized.get(i);
-			newPile1.getCards().add(card);
+			newPile1.add(card);
 
 		}
 
 		for (int i = 1; i <= 20; i += 3) {
 
 			Card card = cardsReorganized.get(i);
-			newPile2.getCards().add(card);
+			newPile2.add(card);
 
 		}
 
 		for (int i = 2; i <= 20; i += 3) {
 
 			Card card = cardsReorganized.get(i);
-			newPile3.getCards().add(card);
+			newPile3.add(card);
 
 		}
+		
+		cardsReorganized.clear();
+		cardsReorganized.addAll(newPile1);
+		cardsReorganized.addAll(newPile2);
+		cardsReorganized.addAll(newPile3);
+		
+		newPile1.clear();
+		newPile2.clear();
+		newPile3.clear();
+		
+		newPile1.addAll(cardsReorganized.subList(0, 7));
+		newPile2.addAll(cardsReorganized.subList(7, 14));
+		newPile3.addAll(cardsReorganized.subList(14, 21));
+		
+		
 
+		Pile pile1 = pileRepository.getOne(idPile1);
+		Pile pile2 = pileRepository.getOne(idPile2);
+		Pile pile3 = pileRepository.getOne(idPile3);
+		
+		pile1.setCards(newPile1);
+		pile2.setCards(newPile2);
+		pile3.setCards(newPile3);
+		
+		pileRepository.save(pile1);
+		pileRepository.save(pile2);
+		pileRepository.save(pile3);
+		
 		deck.setNumberOfplays(numberOfPlay);
 		deck.setAllCards(cardsReorganized);
-		deck.setPile1(newPile1);
-		deck.setPile2(newPile2);
-		deck.setPile3(newPile3);
+		deck.setPile1(pile1);
+		deck.setPile2(pile2);
+		deck.setPile3(pile3);
+		
+		deckRepository.save(deck);
 
 		DeckDto deckDto = DeckDto.converter(deck);
 
 		if (numberOfPlay == 3) {
-			deckDto.setYourCardIs(deckDto.getPile2().getCards().get(3).getCode());
+			deckDto.setYourCardIs(deckDto.getPile2().getCardsDto().get(3).getCode());
 		}
 
 		return deckDto;

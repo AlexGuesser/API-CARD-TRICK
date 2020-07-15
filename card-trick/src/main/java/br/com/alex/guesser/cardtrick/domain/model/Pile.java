@@ -3,14 +3,20 @@ package br.com.alex.guesser.cardtrick.domain.model;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 @Entity
 public class Pile {
 	
 	@Id
-	private Integer id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	private Integer number;
+	private String deckid;
 	@OneToMany
 	private List<Card> cards;
 	
@@ -18,17 +24,18 @@ public class Pile {
 		
 	}
 	
-	public Pile(List<Card> cards,Integer id) {
+	public Pile(List<Card> cards,Integer number,String deck_id) {
 		
 		this.cards = cards;
-		this.id = id;
+		this.number = number;
+		this.deckid = deck_id;
 		
 	}
 
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public List<Card> getCards() {
@@ -36,6 +43,24 @@ public class Pile {
 	}
 	public void setCards(List<Card> cards) {
 		this.cards = cards;
+	}
+	
+	
+
+	public Integer getNumber() {
+		return number;
+	}
+
+	public void setNumber(Integer number) {
+		this.number = number;
+	}
+
+	public String getDeck_id() {
+		return deckid;
+	}
+
+	public void setDeck_id(String deck_id) {
+		this.deckid = deck_id;
 	}
 
 	@Override
