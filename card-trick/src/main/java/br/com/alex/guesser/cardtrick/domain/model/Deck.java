@@ -6,14 +6,11 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-
-
 
 @Entity
 public class Deck implements Serializable {
-	
+
 	@Id
 	private String deckId;
 	@OneToOne
@@ -22,91 +19,57 @@ public class Deck implements Serializable {
 	private Pile pile2;
 	@OneToOne
 	private Pile pile3;
-	@OneToMany
-	private List<Card> allCards;
 	private int round;
-	
+
 	public Deck() {
-		
+
 	}
 
 	public String getDeckId() {
 		return deckId;
 	}
 
-
-
 	public void setDeckId(String deckId) {
 		this.deckId = deckId;
 	}
-
-
 
 	public Pile getPile1() {
 		return pile1;
 	}
 
-
-
 	public void setPile1(Pile pile1) {
 		this.pile1 = pile1;
 	}
-
-
 
 	public Pile getPile2() {
 		return pile2;
 	}
 
-
-
 	public void setPile2(Pile pile2) {
 		this.pile2 = pile2;
 	}
-
-
 
 	public Pile getPile3() {
 		return pile3;
 	}
 
-
-
 	public void setPile3(Pile pile3) {
 		this.pile3 = pile3;
 	}
-
-
-
-	public List<Card> getAllCards() {
-		return allCards;
-	}
-
-
-
-	public void setAllCards(List<Card> allCards) {
-		this.allCards = allCards;
-	}
-
-
 
 	public int getNumberOfplays() {
 		return round;
 	}
 
-
-
 	public void setNumberOfplays(int numberOfplays) {
 		this.round = numberOfplays;
 	}
 
+	public static List<Card> converter(List<String> codeCards, String deck_id, Integer numberOfPlay) {
 
-
-	public static List<Card> converter(List<String> codeCards,String deck_id,Integer numberOfPlay) {
-		
 		List<Card> cardsModel = new ArrayList<>();
-		codeCards.forEach((code) -> cardsModel.add(new Card(code,deck_id,numberOfPlay)));
-		
+		codeCards.forEach((code) -> cardsModel.add(new Card(code, deck_id, numberOfPlay)));
+
 		return cardsModel;
 	}
 
@@ -114,12 +77,11 @@ public class Deck implements Serializable {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((allCards == null) ? 0 : allCards.hashCode());
 		result = prime * result + ((deckId == null) ? 0 : deckId.hashCode());
-		result = prime * result + round;
 		result = prime * result + ((pile1 == null) ? 0 : pile1.hashCode());
 		result = prime * result + ((pile2 == null) ? 0 : pile2.hashCode());
 		result = prime * result + ((pile3 == null) ? 0 : pile3.hashCode());
+		result = prime * result + round;
 		return result;
 	}
 
@@ -132,17 +94,10 @@ public class Deck implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Deck other = (Deck) obj;
-		if (allCards == null) {
-			if (other.allCards != null)
-				return false;
-		} else if (!allCards.equals(other.allCards))
-			return false;
 		if (deckId == null) {
 			if (other.deckId != null)
 				return false;
 		} else if (!deckId.equals(other.deckId))
-			return false;
-		if (round != other.round)
 			return false;
 		if (pile1 == null) {
 			if (other.pile1 != null)
@@ -159,12 +114,9 @@ public class Deck implements Serializable {
 				return false;
 		} else if (!pile3.equals(other.pile3))
 			return false;
+		if (round != other.round)
+			return false;
 		return true;
 	}
-	
-	
-	
-	
-	
 
 }

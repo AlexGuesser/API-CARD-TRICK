@@ -1,30 +1,21 @@
 package br.com.alex.guesser.cardtrick.domain;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.alex.guesser.cardtrick.domain.dto.DeckDto;
-import br.com.alex.guesser.cardtrick.domain.model.Card;
 import br.com.alex.guesser.cardtrick.domain.model.Deck;
-import br.com.alex.guesser.cardtrick.domain.model.Pile;
+import br.com.alex.guesser.cardtrick.domain.model.Move;
 import br.com.alex.guesser.cardtrick.domain.repository.CardRepository;
 import br.com.alex.guesser.cardtrick.domain.repository.DeckRepository;
 import br.com.alex.guesser.cardtrick.domain.repository.PileRepository;
+import br.com.alex.guesser.cardtrick.domain.service.DeckManagerService;
+import br.com.alex.guesser.cardtrick.domain.service.PileManagerService;
 
 @RestController
 @RequestMapping("/game")
@@ -39,184 +30,66 @@ public class MainController {
 	@Autowired
 	PileRepository pileRepository;
 
+	@Autowired
+	DeckManagerService deckManager;
+
+	@Autowired
+	PileManagerService pileManager;
+
 	@GetMapping
-	public DeckDto showDeck() {
+	public DeckDto createAndShowDeck() {
 
-		List<String> allCards = Arrays.asList("AS","2S","3S","4S","5S","6S","7S","8S","9S","10S","JS","QS","KS",
-											  "AC","2C","3C","4C","5C","6C","7C","8C","9C","10C","JC","QC","KC",
-											  "AH","2H","3H","4H","5H","6H","7H","8H","9H","10H","JH","QH","KH",
-											  "AD","2D","3D","4D","5D","6D","7D","8D","9D","10D","JD","QD","KD");
-		
-		Collections.shuffle(allCards);
-		
-		List<String> codeCards = new ArrayList();
-		
-		codeCards.addAll(allCards.subList(0, 21));
-		
-		String idString = Long.toString(System.currentTimeMillis());
-		
-		String deckId = Base64.getEncoder().encodeToString(idString.getBytes());
-		
-		List<Card> cards = Deck.converter(codeCards,deckId,0);
-
-		Deck deck = new Deck();
-		deck.setDeckId(deckId);
-		deck.setAllCards(cards);
-
-		cards.forEach((card) -> cardRepository.save(card));
-
-		Pile pile1 = new Pile(cards.subList(0, 7), 1,deckId);
-		Pile pile2 = new Pile(cards.subList(7, 14), 2,deckId);
-		Pile pile3 = new Pile(cards.subList(14, 21), 3,deckId);
-
-		pileRepository.save(pile1);
-		pileRepository.save(pile2);
-		pileRepository.save(pile3);
-
-		deck.setPile1(pile1);
-		deck.setPile2(pile2);
-		deck.setPile3(pile3);
-		deck.setNumberOfplays(0);
-
-		deckRepository.save(deck);
-		
+		Deck deck = deckManager.createAndSaveOnDatabase();
 		return DeckDto.converter(deck);
 
 	}
 
-	@GetMapping("/plays")
-	public ResponseEntity<DeckDto> play(@RequestParam String deckId, @RequestParam  int round, @RequestParam  int pile) {
+	@PostMapping("/plays")
+	public ResponseEntity<DeckDto> play(@RequestBody Move move) {
 
-		if(deckRepository.findById(deckId).isEmpty()){
-			
+		String deckId = move.getDeckId();
+		int round = move.getRound();
+		int pile = move.getPile();
+
+		if (deckNotFound(deckId)) {
+
 			return ResponseEntity.badRequest().build();
-			
-		};
-		
+
+		}
+
 		Deck deck = deckRepository.getOne(deckId);
-		
+
 		int oldNumberOfPlays = deck.getNumberOfplays();
-		
-		if(round != oldNumberOfPlays +1 || round==4){
-			
+
+		if (roundIsInvalid(round, oldNumberOfPlays)) {
+
 			return ResponseEntity.badRequest().build();
-			
-		}
-		
-		
-		
-		List<Card> cardsReorganized = new ArrayList();
-		
-		Long idPile1 = deck.getPile1().getId();
-		Long idPile2 = deck.getPile2().getId();
-		Long idPile3 = deck.getPile3().getId();
-		
-		System.out.println("Pile1 inical" + deck.getPile1().getCards());
-		System.out.println("Pile2 inical" + deck.getPile2().getCards());
-		System.out.println("Pile3 inical" + deck.getPile3().getCards());
-
-		switch (pile) {
-
-		case 1:
-			
-			cardsReorganized.addAll(deck.getPile2().getCards());
-			cardsReorganized.addAll(deck.getPile1().getCards());
-			cardsReorganized.addAll(deck.getPile3().getCards()); 
-			break;
-
-		case 2:
-			
-			cardsReorganized.addAll(deck.getPile1().getCards());
-			cardsReorganized.addAll(deck.getPile2().getCards());
-			cardsReorganized.addAll(deck.getPile3().getCards()); 
-			break;
-
-		case 3:
-			
-			cardsReorganized.addAll(deck.getPile1().getCards());
-			cardsReorganized.addAll(deck.getPile3().getCards());
-			cardsReorganized.addAll(deck.getPile2().getCards());
-			break;
-		}
-
-		List<Card> newPile1 = new ArrayList();
-		List<Card> newPile2 = new ArrayList();
-		List<Card> newPile3 = new ArrayList();
-		
-
-		for (int i = 0; i <= 20; i += 3) {
-
-			Card card = cardsReorganized.get(i);
-			newPile1.add(card);
 
 		}
 
-		for (int i = 1; i <= 20; i += 3) {
+		Deck newDeck = new Deck();
+		newDeck = pileManager.reorganizePilesAndSaveOnDatabase(deck, deckId, round, pile);
 
-			Card card = cardsReorganized.get(i);
-			newPile2.add(card);
-
-		}
-
-		for (int i = 2; i <= 20; i += 3) {
-
-			Card card = cardsReorganized.get(i);
-			newPile3.add(card);
-
-		}
-		
-		cardsReorganized.clear();
-		cardsReorganized.addAll(newPile1);
-		cardsReorganized.addAll(newPile2);
-		cardsReorganized.addAll(newPile3);
-		
-		List<Card> newCardsReorganized = new ArrayList();
-		
-		cardsReorganized.forEach((card) -> {
-			
-			Card newCard = new Card();
-			newCard.setCode(card.getCode());
-			newCard.setDeck_id(card.getDeck_id());
-			newCard.setNumberOfPlay(round);
-			cardRepository.save(newCard);
-			newCardsReorganized.add(newCard);
-			
-		});
-		
-		newPile1.clear();
-		newPile2.clear();
-		newPile3.clear();
-		
-		newPile1.addAll(newCardsReorganized.subList(0, 7));
-		newPile2.addAll(newCardsReorganized.subList(7, 14));
-		newPile3.addAll(newCardsReorganized.subList(14, 21));		
-		
-		Pile pile1 = pileRepository.getOne(idPile1);
-		Pile pile2 = pileRepository.getOne(idPile2);
-		Pile pile3 = pileRepository.getOne(idPile3);
-		
-		pile1.setCards(newPile1);
-		pile2.setCards(newPile2);
-		pile3.setCards(newPile3);
-		
-		pileRepository.save(pile1);
-		pileRepository.save(pile2);
-		pileRepository.save(pile3);
-		
-		deck.setNumberOfplays(round);
-		deck.setAllCards(cardsReorganized);
-		
-		
-		deckRepository.save(deck);
-
-		DeckDto deckDto = DeckDto.converter(deck);
+		DeckDto deckDto = DeckDto.converter(newDeck);
 
 		if (round == 3) {
-			deckDto.setYourCardIs(deckDto.getPile2().getCardsDto().get(3).getCode());
+			showTheChosenCard(deckDto);
 		}
 
 		return ResponseEntity.ok(deckDto);
 
+	}
+
+	private void showTheChosenCard(DeckDto deckDto) {
+		deckDto.setYourCardIs(deckDto.getPile2().getCardsDto().get(3).getCode());
+	}
+
+	private boolean deckNotFound(String deckId) {
+		return deckRepository.findById(deckId).isEmpty();
+	}
+
+	private boolean roundIsInvalid(int round, int oldNumberOfPlays) {
+		return round != oldNumberOfPlays + 1 || round == 4;
 	}
 
 }
