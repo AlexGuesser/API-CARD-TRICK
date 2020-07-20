@@ -1,5 +1,8 @@
 package br.com.alex.guesser.cardtrick.domain;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +50,8 @@ public class MainController {
 	@PostMapping("/plays")
 	public ResponseEntity<DeckDto> play(@RequestBody Move move) {
 
+		List<Integer> possiblePiles = Arrays.asList(1, 2, 3);
+
 		String deckId = move.getDeckId();
 		int round = move.getRound();
 		int pile = move.getPile();
@@ -67,6 +72,12 @@ public class MainController {
 
 		}
 
+		if (pointedPileIsInvalid(possiblePiles, pile)) {
+
+			return ResponseEntity.badRequest().build();
+
+		}
+
 		Deck newDeck = new Deck();
 		newDeck = pileManager.reorganizePilesAndSaveOnDatabase(deck, deckId, round, pile);
 
@@ -78,6 +89,10 @@ public class MainController {
 
 		return ResponseEntity.ok(deckDto);
 
+	}
+
+	private boolean pointedPileIsInvalid(List<Integer> possiblePiles, int pile) {
+		return !possiblePiles.contains(pile);
 	}
 
 	private void showTheChosenCard(DeckDto deckDto) {
