@@ -6,7 +6,7 @@ This API Rest built with Spring Boot will allow you to do a card magic (actually
 
 To Run this API  just dowload the project, descompt and open as a Maven project. After that, create a database with name db_card_trick at your MySQL connection, and configure the application.properties of this project with your url,user and password.
 
-This API has two end-points. The first is "/game" where using GET you will receive a deck with its "deckId", and three cards piles with seven cards each. Pick a card, memorize it, and go to "/plays". At "/plays", using GET, you will inform three RequestParams: deckId,round and pile. After three "/plays", sending corrects deckId,round and pile, you will visualize the code of the imagined card at "yourCardIs".
+This API has two end-points. The first is "/game" where using GET you will receive a deck with its "deckId", and three cards piles with seven cards each. Pick a card, memorize it, and go to "/plays". At "/plays", using POST, you hava to inform your move on RequestBody with three parameters: deckId,round and pile. After three "/plays", sending corrects deckId,round and pile, you will visualize the code of the imagined card at "yourCardIs".
 
 Good Game!
 
